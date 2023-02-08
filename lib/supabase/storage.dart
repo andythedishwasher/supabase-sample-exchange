@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class Sample {
@@ -10,12 +11,12 @@ class Sample {
 }
 
 Future<String> uploadUserPhoto(SupabaseClient client, User user) async {
-  FilePickerResult? result =
+  FilePickerResult? selected =
       await FilePicker.platform.pickFiles(type: FileType.image);
 
-  if (result != null) {
-    String extension = result.files.single.extension!;
-    File photoFile = File(result.files.single.path!);
+  if (selected != null) {
+    String extension = selected.files.single.extension!;
+    File photoFile = File(selected.files.single.path!);
     try {
       await client.storage.from('lsd-media').upload(
             'profile-photos/${user.id}/profile.$extension',
@@ -42,11 +43,11 @@ Future<String> uploadUserPhoto(SupabaseClient client, User user) async {
 
 Future<String> uploadSample(
     SupabaseClient client, User user, String title) async {
-  FilePickerResult? result =
+  FilePickerResult? selected =
       await FilePicker.platform.pickFiles(type: FileType.audio);
-  if (result != null) {
-    File sampleFile = File(result.files.single.path!);
-    String ext = result.files.single.extension!;
+  if (selected != null) {
+    File sampleFile = File(selected.files.single.path!);
+    String ext = selected.files.single.extension!;
     String artist = user.userMetadata?['displayName'] ?? 'unkown';
     try {
       final String path = await client.storage.from('lsd-media').upload(
@@ -59,6 +60,8 @@ Future<String> uploadSample(
     } catch (e) {
       return 'Upload Error: ${e.toString()}';
     }
+
+    //imported Realtime notification call goes here
 
     String signedUrl = await client.storage
         .from('lsd-media')
@@ -85,7 +88,22 @@ Future<List<Sample>> samplePool(SupabaseClient client) async {
       }
     }
   }
-  samples.forEach((sample) =>
-      {print(sample.artist), print(sample.title), print(sample.url)});
   return samples;
+}
+
+Future<String> claimSample(
+    SupabaseClient client, String artist, String filename) async {
+  final bucketPath = 'sample-pool/$artist/$filename';
+  final claimedFileBytes =
+      await client.storage.from('lsd-media').download(bucketPath);
+  final Directory appDocs = await getApplicationDocumentsDirectory();
+  final String localPath = Platform.isWindows
+      ? '${appDocs.path}\\LSD Samples\\$artist\\$filename'
+      : '${appDocs.path}/LSD Samples/$artist/$filename';
+  final File claimedFile = File(localPath);
+  await claimedFile.create(recursive: true);
+  await claimedFile.writeAsBytes(claimedFileBytes);
+  await client.storage.from('lsd-media').remove([bucketPath]);
+  return localPath;
+  //imported Realtime notification call goes here
 }

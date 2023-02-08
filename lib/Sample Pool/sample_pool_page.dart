@@ -61,6 +61,21 @@ class _SamplePoolPageState extends State<SamplePoolPage> {
                                     _samples![index].title ?? 'unknown title',
                                 url: _samples![index].url!),
                             const SizedBox(height: 10.0),
+                            ElevatedButton(
+                                child: const Text('Claim Sample'),
+                                onPressed: () async => {
+                                      await claimSample(
+                                          widget.client,
+                                          _samples![index].artist ??
+                                              'unknown artist',
+                                          _samples![index].title ??
+                                              'unknown title'),
+                                      samplePool(widget.client)
+                                          .then((samples) => {
+                                                setState(
+                                                    () => {_samples = samples})
+                                              })
+                                    })
                           ],
                         );
                       }),

@@ -81,7 +81,6 @@ class _NetworkAudioPlayerState extends State<NetworkAudioPlayer> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 30.0,
-      width: 300.0,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
