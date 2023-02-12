@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uni_links_desktop/uni_links_desktop.dart';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 //Routes
 import 'Login/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
   if (Platform.isWindows) {
     registerProtocol('lsdsamples');
   }
 
   await Supabase.initialize(
-    url: 'https://fhibjauqwfumckxpcsia.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoaWJqYXVxd2Z1bWNreHBjc2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzUzNDQ1OTUsImV4cCI6MTk5MDkyMDU5NX0.pM0p23du8G45YVdUZuBxIgKxsDiXrBFRyZV8bFRVwnc',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
   runApp(const SampleExchange());
