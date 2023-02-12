@@ -10,7 +10,7 @@ A sample exchange app written with Flutter and Supabase.
 
 ## Project Setup
 
-Clone repo locally and set up a Supabase account. Create a project and fill out the .env file with the project url and anon key found on the API Settings page as single-quoted strings. For the Windows build, you can define your app icon by replacing the file windows/runner/resources/app_icon.png with your own png renamed to match the path. So far, that's the only platform this has been extensively tested on, but deep links are set up for Android. You'll just have to fill in a custom url scheme for the deep links in the main.dart initializer like so for the windows build:
+Clone repo locally and set up a Supabase account. Create a project and fill out the .env file with the project url and anon key found on the API Settings page as single-quoted strings. For the Windows build, you can define your app icon by replacing the file windows/runner/resources/app_icon.png with your own png renamed to match the path. So far, that's the only platform this has been extensively tested on, but deep links are set up for Android. You'll just have to fill in a custom url protocol for the deep links in the main.dart initializer like so for the windows build:
 
 ```
 void main() async {
@@ -38,7 +38,9 @@ For the android build, you will want to use the same scheme in the activity sect
     </intent-filter>
 </activity>
 ```
-You'll then go to your Supabase console and navigate to the URL Configuration section of the Auth tab. There, you should specify your site url as 'YOUR-CUSTOM-SCHEME://'. That causes auth redirects to point at the Login page where all of the automated auth-based routing occurs in the initializer.
+Be sure to choose a custom protocol that's likely to remain globally unique so that routing conflicts don't arise with other apps that end up assuming the same protocol, i.e. instead of my-label-samples, make it f9we35tu6o9-my-label-samples or some other alphanumeric identifier.
+
+You'll then go to your Supabase console and navigate to the URL Configuration section of the Auth tab. There, you should specify your site url as 'YOUR-CUSTOM-PROTOCOL://'. That causes auth redirects to point at the Login page where all of the automated auth-based routing occurs in the initializer.
 
 IMPORTANT NOTE: This repo is not designed for web deployments. I'll be adding a separate branch for the web version when I get time, but it mainly just involves ditching the uni_links dependency and using a regular oauth redirect instead of the custom scheme. If you want to use both in the same project right now, the way to do it would be to clone the repo again in a separate directory, rename the folder to include _web or some other indicator, then remove all references to uni_links or uni_links_desktop from the pubspec.yaml in the new directory. You will only use this directory for web builds. For Android or Windows builds, use this repo's dependencies the way they are. You would also need to add your browser app's base url to the list of authorized redirects on your Supabase console.
 
